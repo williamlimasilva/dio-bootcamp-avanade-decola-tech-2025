@@ -24,7 +24,7 @@ export interface UpdateClientRequest {
   phone: string;
 }
 
-export interface ListClientsResponse {
+export interface ListClientResponse {
   id: number;
   name: string;
   email: string;
