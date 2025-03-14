@@ -1,9 +1,17 @@
-import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import {
+  SaveScheduleRequest,
+  SaveScheduleResponse,
+  ScheduleAppointmentMonthResponse,
+} from './schedules.model';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class SchedulesService {
+export interface ScheduleInterface {
+  save(request: SaveScheduleRequest): Observable<SaveScheduleResponse>;
 
-  constructor() { }
+  delete(id: number): Observable<void>;
+
+  listInMonth(
+    year: number,
+    month: number
+  ): Observable<ScheduleAppointmentMonthResponse>;
 }

@@ -8,7 +8,7 @@ import {
   UpdateClientResponse,
 } from './clients.model';
 
-export interface ICLientService {
+export interface ClientsInterface {
   save(request: SaveClientRequest): Observable<SaveClientResponse>;
 
   update(
