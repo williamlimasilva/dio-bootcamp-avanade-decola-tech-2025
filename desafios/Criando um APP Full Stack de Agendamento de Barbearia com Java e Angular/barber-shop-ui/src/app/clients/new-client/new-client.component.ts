@@ -4,6 +4,7 @@ import { Subscription } from 'rxjs';
 import { ClientsInterface } from '../../services/api-client/clients/clients.interface';
 import { SERVICES_TOKEN } from '../../services/service.token';
 import { SnackbarManagerInterface } from '../../services/snackbar-manager.interface';
+import { SnackbarManagerService } from '../../services/snackbar-manager.service';
 import { ClientModelForm } from '../client.model';
 import { ClientFormComponent } from '../components/client-form/client-form.component';
 import { ClientsService } from './../../services/api-client/clients/clients.service';
@@ -17,6 +18,10 @@ import { ClientsService } from './../../services/api-client/clients/clients.serv
     {
       provide: SERVICES_TOKEN.HTTP.CLIENT,
       useClass: ClientsService,
+    },
+    {
+      provide: SERVICES_TOKEN.SNACKBAR,
+      useClass: SnackbarManagerService,
     },
   ],
 })
