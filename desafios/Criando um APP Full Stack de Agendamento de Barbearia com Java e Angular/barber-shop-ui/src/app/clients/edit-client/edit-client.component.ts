@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -9,11 +8,11 @@ import { SnackbarManagerInterface } from '../../services/snackbar-manager.interf
 import { SnackbarManagerService } from '../../services/snackbar-manager.service';
 import { ClientModelForm } from '../client.model';
 import { ClientFormComponent } from '../components/client-form/client-form.component';
+import { UpdateClientRequest } from './../../services/api-client/clients/clients.model';
 
 @Component({
   selector: 'app-edit-client',
-  standalone: true,
-  imports: [ClientFormComponent, CommonModule],
+  imports: [ClientFormComponent],
   templateUrl: './edit-client.component.html',
   styleUrl: './edit-client.component.scss',
   providers: [
@@ -56,17 +55,18 @@ export class EditClientComponent implements OnInit, OnDestroy {
   onSubmitClient(value: ClientModelForm) {
     const { id, ...request } = value;
 
-    if (!id) {
-      this.snackBarManager.show('Um erro inesperado aconteceu');
-      this.router.navigate(['clients/list']);
+    if (id !== undefined && id !== null && id !== 0) {
+      this.httpsubscriptions?.push(
+        this.httpService
+          .update(id, request as UpdateClientRequest)
+          .subscribe((_) => {
+            this.snackBarManager.show('Usuário atualizado com sucesso');
+            this.router.navigate(['clients/list']);
+          })
+      );
       return;
     }
-
-    this.httpsubscriptions.push(
-      this.httpService.update(id, { ...request, id }).subscribe(() => {
-        this.snackBarManager.show('Usuário atualizado com sucesso');
-        this.router.navigate(['clients/list']);
-      })
-    );
+    this.snackBarManager.show('Um erro inesperado aconteceu');
+    this.router.navigate(['clients/list']);
   }
 }
