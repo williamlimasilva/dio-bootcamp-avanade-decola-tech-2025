@@ -26,9 +26,9 @@ app-card-header {
 }
 
 app-menu-bar {
-  background-color: #fff;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background-color: #ffffff;
+  border-bottom: 1px solid #0000001a;
+  box-shadow: 0 2px 4px #0000000d;
   padding: 8px 0;
   margin-bottom: 20px;
 }
@@ -63,50 +63,5 @@ router-outlet + * {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-::ng-deep {
-  .mat-mdc-raised-button.mat-primary {
-    background-color: #00897b;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background-color: #00796b;
-    }
-  }
-
-  .mat-mdc-raised-button.mat-accent {
-    background-color: #ff8f00;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-      background-color: #ff6f00;
-    }
-  }
-
-  .mat-mdc-card {
-    border-radius: 8px;
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
-
-    &:hover {
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-      transform: translateY(-2px);
-    }
-  }
-
-  .mat-mdc-table {
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-
-  .mat-mdc-header-row {
-    background-color: rgba(0, 137, 123, 0.08);
-  }
-
-  .mat-mdc-row:hover {
-    background-color: rgba(0, 0, 0, 0.03);
   }
 }

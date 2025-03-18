@@ -105,9 +105,9 @@ export class ScheduleCalendarComponent
 
   set selected(selected: Date) {
     if (this._selected.getTime() !== selected.getTime()) {
-      this.onDateChange.emit(selected);
+      this._selected = new Date(selected);
       this.buildTable();
-      this._selected = selected;
+      this.onDateChange.emit(this._selected);
     }
   }
 
