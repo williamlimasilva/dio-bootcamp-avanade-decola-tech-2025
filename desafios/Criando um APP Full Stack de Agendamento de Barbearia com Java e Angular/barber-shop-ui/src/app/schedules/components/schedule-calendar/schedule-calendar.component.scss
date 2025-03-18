@@ -1,3 +1,21 @@
+.container {
+  display: flex;
+  padding: 1rem;
+  justify-content: left;
+  align-items: flex-start;
+  height: 100vh;
+  background-color: #f5f5f5;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
 .calendar-card {
-  width: 30rem;
+  margin-top: 1rem;
+  width: 20rem;
+}
+
+.table {
+  align-items: end;
 }
