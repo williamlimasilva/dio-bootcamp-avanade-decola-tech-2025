@@ -22,8 +22,8 @@ import { SERVICES_TOKEN } from './../../services/service.token';
 })
 export class ListClientsComponent implements OnInit, OnDestroy {
   private httpSubscriptions: Subscription[] = [];
-
   clients: ClientModelTable[] = [];
+
   constructor(
     @Inject(SERVICES_TOKEN.HTTP.CLIENT)
     private readonly httpService: ClientsInterface,

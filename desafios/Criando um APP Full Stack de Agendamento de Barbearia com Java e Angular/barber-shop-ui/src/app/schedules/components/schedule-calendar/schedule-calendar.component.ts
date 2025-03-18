@@ -32,7 +32,7 @@ import { SERVICES_TOKEN } from '../../../services/service.token';
 import {
   ClientScheduleAppointmentModel,
   SaveScheduleModel,
-  ScheduleAppointementMonthModel,
+  ScheduleAppointmentMonthModel,
   SelectClientModel,
 } from '../../schedule.model';
 
@@ -84,7 +84,7 @@ export class ScheduleCalendarComponent
 
   clientSelectFormControl = new FormControl();
 
-  @Input() monthSchedule!: ScheduleAppointementMonthModel;
+  @Input() monthSchedule!: ScheduleAppointmentMonthModel;
   @Input() clients: SelectClientModel[] = [];
 
   @Output() onDateChange = new EventEmitter<Date>();

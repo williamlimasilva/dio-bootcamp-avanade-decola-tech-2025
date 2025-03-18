@@ -11,7 +11,7 @@ import { ScheduleCalendarComponent } from '../components/schedule-calendar/sched
 import {
   ClientScheduleAppointmentModel,
   SaveScheduleModel,
-  ScheduleAppointementMonthModel,
+  ScheduleAppointmentMonthModel,
   SelectClientModel,
 } from '../schedule.model';
 import { ScheduleService } from './../../services/api-client/schedules/schedules.service';
@@ -31,7 +31,7 @@ export class SchedulesMonthComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private selectedDate?: Date;
 
-  monthSchedule!: ScheduleAppointementMonthModel;
+  monthSchedule!: ScheduleAppointmentMonthModel;
   clients: SelectClientModel[] = [];
 
   constructor(

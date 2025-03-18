@@ -1,4 +1,4 @@
-export interface ScheduleAppointementMonthModel {
+export interface ScheduleAppointmentMonthModel {
   year: number;
   month: number;
   scheduledAppointments: ClientScheduleAppointmentModel[];
