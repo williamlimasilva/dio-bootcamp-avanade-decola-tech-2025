@@ -68,6 +68,7 @@ export class ClientTableComponent
   ngAfterViewInit(): void {
     this.dataSource.paginator = this.paginator;
   }
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['clients'] && this.clients) {
       this.dataSource = new MatTableDataSource<ClientModelTable>(this.clients);
@@ -76,6 +77,7 @@ export class ClientTableComponent
       }
     }
   }
+
   ngOnDestroy(): void {
     if (this.dialogManagerServiceSubscriptions) {
       this.dialogManagerServiceSubscriptions.unsubscribe();
