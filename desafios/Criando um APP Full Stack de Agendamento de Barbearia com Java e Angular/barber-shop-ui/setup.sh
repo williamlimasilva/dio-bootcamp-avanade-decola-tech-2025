@@ -5,7 +5,7 @@ ng generate component clients/edit-client --skip-tests &&
 ng generate component clients/components/client-form --skip-tests &&
 ng generate component clients/components/client-table --skip-tests &&
 
-touch src/app/clients/client.models.ts &&
+touch src/app/clients/client.model.ts &&
 
 #schedules
 ng generate component schedules/schedules-month --skip-tests &&
@@ -27,15 +27,16 @@ ng generate service services/api-client/schedules/schedules --skip-tests &&
 #environments
 ng generate environments &&
 
-touch src/app/services/idialog-manager.service.ts &&
-touch src/app/services/isnackbar-manager.service.ts &&
+touch src/app/services/dialog-manager.interface.ts &&
+touch src/app/services/snackbar-manager.interface.ts &&
 touch src/app/services/service.token.ts &&
 
-touch src/app/services/api-client/clients/iclients.service.ts &&
-touch src/app/services/api-client/clients/client.models.ts &&
+touch src/app/services/api-client/clients/clients.interface.ts &&
+touch src/app/services/api-client/clients/clients.model.ts &&
 
+touch src/app/services/api-client/schedules/schedules.interface.ts &&
 touch src/app/services/api-client/schedules/schedules.service.ts &&
-touch src/app/services/api-client/schedules/schedule.models.ts &&
+touch src/app/services/api-client/schedules/schedules.model.ts &&
 
 #yarn add @angular/cdk bootstrap ngx-mask
 
