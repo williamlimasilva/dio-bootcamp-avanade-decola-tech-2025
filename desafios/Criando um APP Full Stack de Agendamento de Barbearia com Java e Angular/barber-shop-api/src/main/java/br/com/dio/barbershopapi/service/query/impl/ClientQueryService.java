@@ -38,7 +38,7 @@ public class ClientQueryService implements ClientQueryServiceInterface {
 
     @Override
     public void verifyPhone(long id, String phone) {
-        Optional<ClientEntity> optional = repository.findbyPhone(phone);
+        Optional<ClientEntity> optional = repository.findByPhone(phone);
         if(optional.isPresent() && !Objects.equals(optional.get().getId(), id)){
             String message = String.format("Phone %s already exists", phone);
             throw new PhoneInUseException(message);
