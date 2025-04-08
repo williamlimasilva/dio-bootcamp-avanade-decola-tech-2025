@@ -35,9 +35,9 @@ public class ScheduleController {
         return scheduleMapper.toSaveResponse(schedule);
     }
 
-    @DeleteMapping
+    @DeleteMapping("{id}")
     @ResponseStatus(NO_CONTENT)
-    void delete(@RequestParam long id) {
+    void delete(@PathVariable long id) {
         scheduleService.delete(id);
     }
 

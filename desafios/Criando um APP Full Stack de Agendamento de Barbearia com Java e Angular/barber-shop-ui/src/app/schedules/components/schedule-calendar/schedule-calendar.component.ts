@@ -123,40 +123,102 @@ export class ScheduleCalendarComponent
     }
   }
   ngOnChanges(changes: SimpleChanges): void {
+    console.log('ngOnChanges detected in schedule-calendar', changes);
+
     if (changes['monthSchedule'] && this.monthSchedule) {
+      console.log('monthSchedule changed:', this.monthSchedule);
+      // Make sure monthSchedule has the scheduledAppointments property
+      if (!this.monthSchedule.scheduledAppointments) {
+        console.warn(
+          'monthSchedule is missing scheduledAppointments, creating empty array'
+        );
+        this.monthSchedule.scheduledAppointments = [];
+      }
+
+      // Force a rebuild of the table when new data arrives
       this.buildTable();
+    }
+
+    if (changes['clients'] && this.clients) {
+      // Update client selection if needed
+      if (this.clientSelectFormControl) {
+        this.clientSelectFormControl.updateValueAndValidity();
+      }
     }
   }
 
   onSubmit(form: NgForm) {
+    if (
+      !this.newSchedule.startAt ||
+      !this.newSchedule.endAt ||
+      !this.newSchedule.clientId
+    ) {
+      return;
+    }
+
     const startAt = new Date(this._selected);
     const endAt = new Date(this._selected);
+
     startAt.setHours(
-      this.newSchedule.startAt!.getHours(),
-      this.newSchedule.startAt!.getMinutes()
+      this.newSchedule.startAt.getHours(),
+      this.newSchedule.startAt.getMinutes()
     );
     endAt.setHours(
-      this.newSchedule.endAt!.getHours(),
-      this.newSchedule.endAt!.getMinutes()
+      this.newSchedule.endAt.getHours(),
+      this.newSchedule.endAt.getMinutes()
     );
-    const saved: ClientScheduleAppointmentModel = {
-      id: -1,
-      day: this._selected.getDate(),
+
+    const scheduleData: SaveScheduleModel = {
       startAt,
       endAt,
-      clientId: this.newSchedule.clientId!,
-      clientName: this.clients.find((c) => c.id === this.newSchedule.clientId!)!
-        .name,
+      clientId: this.newSchedule.clientId,
     };
-    this.monthSchedule.scheduledAppointments.push(saved);
-    this.onScheduleClient.emit(saved);
-    this.buildTable();
+
+    this.onScheduleClient.emit(scheduleData);
+
+    // Add the appointment to the current view immediately
+    this.addAppointmentToTable(scheduleData);
+
+    // Reset form after submission
     form.resetForm();
     this.newSchedule = {
       startAt: undefined,
       endAt: undefined,
       clientId: undefined,
     };
+  }
+
+  // Add this new method to handle adding appointments to the table
+  private addAppointmentToTable(schedule: SaveScheduleModel) {
+    // Find client name from the client id
+    const client = this.clients.find((c) => c.id === schedule.clientId);
+    if (!client) return;
+
+    // Create a temporary ID for the new appointment
+    // This will be replaced with the real ID from the server response
+    const tempId = Date.now();
+
+    // Create a new appointment model to add to the table
+    const newAppointment: ClientScheduleAppointmentModel = {
+      id: tempId,
+      day: this._selected.getDate(),
+      startAt: schedule.startAt!,
+      endAt: schedule.endAt!,
+      clientId: schedule.clientId!,
+      clientName: client.name,
+    };
+
+    // Add the new appointment to the data source
+    const currentData = this.dataSource.data;
+    this.dataSource = new MatTableDataSource<ClientScheduleAppointmentModel>([
+      ...currentData,
+      newAppointment,
+    ]);
+
+    // Update paginator
+    if (this.paginator) {
+      this.dataSource.paginator = this.paginator;
+    }
   }
 
   requestDelete(schedule: ClientScheduleAppointmentModel) {
@@ -189,17 +251,40 @@ export class ScheduleCalendarComponent
   }
 
   private buildTable() {
-    const appointments = this.monthSchedule.scheduledAppointments.filter(
-      (a) =>
-        this.monthSchedule.year === this._selected.getFullYear() &&
-        this.monthSchedule.month - 1 === this._selected.getMonth() &&
-        a.day === this._selected.getDate()
-    );
-    this.dataSource = new MatTableDataSource<ClientScheduleAppointmentModel>(
-      appointments
-    );
-    if (this.paginator) {
-      this.dataSource.paginator = this.paginator;
+    console.log('Building table with monthSchedule:', this.monthSchedule);
+
+    // Only try to filter appointments if we have monthSchedule data
+    if (!this.monthSchedule || !this.monthSchedule.scheduledAppointments) {
+      console.warn('Missing data for table, using empty dataset');
+      this.dataSource = new MatTableDataSource<ClientScheduleAppointmentModel>(
+        []
+      );
+      return;
+    }
+
+    try {
+      const appointments = this.monthSchedule.scheduledAppointments.filter(
+        (a) =>
+          this.monthSchedule.year === this._selected.getFullYear() &&
+          this.monthSchedule.month - 1 === this._selected.getMonth() &&
+          a.day === this._selected.getDate()
+      );
+
+      console.log('Filtered appointments for selected date:', appointments);
+
+      this.dataSource = new MatTableDataSource<ClientScheduleAppointmentModel>(
+        appointments
+      );
+
+      if (this.paginator) {
+        this.dataSource.paginator = this.paginator;
+      }
+    } catch (error) {
+      console.error('Error while building table:', error);
+      // Create empty datasource on error
+      this.dataSource = new MatTableDataSource<ClientScheduleAppointmentModel>(
+        []
+      );
     }
   }
 }

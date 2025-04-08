@@ -126,7 +126,72 @@ Database migrations are managed using Flyway. Migration scripts are located in t
 
 ## API Endpoints
 
-- `/clients`: Manages client information.
-- `/schedules`: Manages appointment schedules.
+### Client Endpoints
 
-Refer to the API documentation for detailed information on each endpoint.
+- `/clients`: Manages client information.
+
+### Schedule Endpoints
+
+- **Create Schedule**
+
+  - Endpoint: `POST /schedules`
+  - Description: Creates a new appointment schedule
+  - Request Body:
+    ```json
+    {
+      "startAt": "2025-04-01T10:00:00Z",
+      "endAt": "2025-04-01T11:00:00Z",
+      "clientId": 1
+    }
+    ```
+  - Response Body:
+    ```json
+    {
+      "id": 1,
+      "startAt": "2025-04-01T10:00:00Z",
+      "endAt": "2025-04-01T11:00:00Z",
+      "clientId": 1
+    }
+    ```
+  - Status Codes:
+    - 201: Schedule created successfully
+    - 400: Invalid request (validation error)
+    - 409: Schedule time slot already in use
+
+- **Delete Schedule**
+
+  - Endpoint: `DELETE /schedules/{id}`
+  - Description: Deletes an existing schedule
+  - Path Parameters:
+    - `id`: The ID of the schedule to delete
+  - Response: None (No Content)
+  - Status Codes:
+    - 204: Schedule deleted successfully
+    - 404: Schedule not found
+
+- **Get Schedules for Month**
+  - Endpoint: `GET /schedules/{year}/{month}`
+  - Description: Retrieves all schedules for a specific month
+  - Path Parameters:
+    - `year`: Year (e.g., 2025)
+    - `month`: Month (1-12)
+  - Response Body:
+    ```json
+    {
+      "year": 2025,
+      "month": 4,
+      "scheduledAppointments": [
+        {
+          "id": 1,
+          "day": 1,
+          "startAt": "2025-04-01T10:00:00Z",
+          "endAt": "2025-04-01T11:00:00Z",
+          "clientId": 1,
+          "clientName": "John Doe"
+        },
+        ...
+      ]
+    }
+    ```
+  - Status Codes:
+    - 200: Request processed successfully

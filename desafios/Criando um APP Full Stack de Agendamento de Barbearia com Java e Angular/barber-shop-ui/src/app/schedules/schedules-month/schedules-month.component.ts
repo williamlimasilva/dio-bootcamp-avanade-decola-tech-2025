@@ -31,7 +31,12 @@ export class SchedulesMonthComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   private selectedDate?: Date;
 
-  monthSchedule!: ScheduleAppointmentMonthModel;
+  monthSchedule: ScheduleAppointmentMonthModel = {
+    year: new Date().getFullYear(),
+    month: new Date().getMonth() + 1,
+    scheduledAppointments: [],
+  };
+
   clients: SelectClientModel[] = [];
 
   constructor(
@@ -71,11 +76,30 @@ export class SchedulesMonthComponent implements OnInit, OnDestroy {
         clientId: schedule.clientId,
       };
       this.subscriptions.push(
-        this.httpService.save(request).subscribe(() => {
-          this.snackbarManage.show('Agendamento realizado com sucesso');
-          if (this.selectedDate) {
-            this.fetchSchedules(this.selectedDate);
-          }
+        this.httpService.save(request).subscribe({
+          next: (_) => {
+            this.snackbarManage.show('Agendamento realizado com sucesso');
+            // Explicitly refetch the data with a short delay to ensure the backend has processed the request
+            setTimeout(() => {
+              if (this.selectedDate) {
+                this.fetchSchedules(this.selectedDate);
+              }
+            }, 500); // Increased delay to ensure backend processing
+          },
+          error: (err) => {
+            console.error('Error creating appointment:', err);
+            let errorMessage = 'Erro ao realizar agendamento. Tente novamente.';
+
+            // Check for specific error cases
+            if (err.status === 409) {
+              errorMessage = 'Horário já está agendado. Escolha outro horário.';
+            } else if (err.status === 400) {
+              errorMessage =
+                'Dados inválidos. Verifique as informações e tente novamente.';
+            }
+
+            this.snackbarManage.show(errorMessage);
+          },
         })
       );
     }
@@ -84,10 +108,48 @@ export class SchedulesMonthComponent implements OnInit, OnDestroy {
   private fetchSchedules(currentDate: Date) {
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth() + 1;
+
+    console.log(`Fetching schedules for ${year}/${month} from component`);
+
     this.subscriptions.push(
-      this.httpService
-        .listInMonth(year, month)
-        .subscribe((data) => (this.monthSchedule = data))
+      this.httpService.listInMonth(year, month).subscribe({
+        next: (data) => {
+          console.log('Received schedule data:', data);
+
+          // Ensure data has scheduledAppointments before assigning
+          if (data && typeof data === 'object') {
+            // Create a valid object even if data is incomplete
+            this.monthSchedule = {
+              year: data.year || year,
+              month: data.month || month,
+              scheduledAppointments: data.scheduledAppointments || [],
+            };
+
+            console.log('Updated monthSchedule:', this.monthSchedule);
+          } else {
+            console.error('Received invalid data format:', data);
+            this.snackbarManage.show('Erro no formato dos dados recebidos');
+
+            // Set default values if data is invalid
+            this.monthSchedule = {
+              year: year,
+              month: month,
+              scheduledAppointments: [],
+            };
+          }
+        },
+        error: (err) => {
+          console.error('Error fetching schedules:', err);
+          this.snackbarManage.show('Erro ao carregar agendamentos');
+
+          // Set default values on error
+          this.monthSchedule = {
+            year: year,
+            month: month,
+            scheduledAppointments: [],
+          };
+        },
+      })
     );
   }
 }
