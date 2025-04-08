@@ -60,12 +60,40 @@ export class SchedulesMonthComponent implements OnInit, OnDestroy {
   }
 
   onDateChange(date: Date) {
+    console.log('Date changed to:', date);
     this.selectedDate = date;
-    this.fetchSchedules(date);
+
+    const selectedYear = date.getFullYear();
+    const selectedMonth = date.getMonth() + 1;
+
+    if (
+      selectedYear !== this.monthSchedule.year ||
+      selectedMonth !== this.monthSchedule.month
+    ) {
+      console.log('Fetching new month data');
+      this.fetchSchedules(date);
+    } else {
+      console.log('Using existing month data, month already loaded');
+    }
   }
 
   onConfirmDelete(schedule: ClientScheduleAppointmentModel) {
-    this.subscriptions.push(this.httpService.delete(schedule.id).subscribe());
+    this.subscriptions.push(
+      this.httpService.delete(schedule.id).subscribe({
+        next: () => {
+          this.monthSchedule.scheduledAppointments =
+            this.monthSchedule.scheduledAppointments.filter(
+              (a) => a.id !== schedule.id
+            );
+
+          this.snackbarManage.show('Agendamento excluído com sucesso');
+        },
+        error: (err) => {
+          console.error('Error deleting appointment:', err);
+          this.snackbarManage.show('Erro ao excluir agendamento');
+        },
+      })
+    );
   }
 
   onScheduleClient(schedule: SaveScheduleModel) {
@@ -75,28 +103,50 @@ export class SchedulesMonthComponent implements OnInit, OnDestroy {
         endAt: schedule.endAt,
         clientId: schedule.clientId,
       };
+
+      const clientName =
+        this.clients.find((c) => c.id === schedule.clientId)?.name || 'Cliente';
+
+      const tempId = Date.now();
+
+      const tempAppointment: ClientScheduleAppointmentModel = {
+        id: tempId,
+        day: schedule.startAt.getDate(),
+        startAt: schedule.startAt,
+        endAt: schedule.endAt!,
+        clientId: schedule.clientId,
+        clientName: clientName,
+      };
+
+      this.monthSchedule.scheduledAppointments.push(tempAppointment);
+
       this.subscriptions.push(
         this.httpService.save(request).subscribe({
-          next: (_) => {
+          next: (response) => {
             this.snackbarManage.show('Agendamento realizado com sucesso');
-            // Explicitly refetch the data with a short delay to ensure the backend has processed the request
-            setTimeout(() => {
-              if (this.selectedDate) {
-                this.fetchSchedules(this.selectedDate);
-              }
-            }, 500); // Increased delay to ensure backend processing
+
+            const index = this.monthSchedule.scheduledAppointments.findIndex(
+              (a) => a.id === tempId
+            );
+            if (index !== -1) {
+              this.monthSchedule.scheduledAppointments[index].id = response.id;
+            }
           },
           error: (err) => {
             console.error('Error creating appointment:', err);
             let errorMessage = 'Erro ao realizar agendamento. Tente novamente.';
 
-            // Check for specific error cases
             if (err.status === 409) {
               errorMessage = 'Horário já está agendado. Escolha outro horário.';
             } else if (err.status === 400) {
               errorMessage =
                 'Dados inválidos. Verifique as informações e tente novamente.';
             }
+
+            this.monthSchedule.scheduledAppointments =
+              this.monthSchedule.scheduledAppointments.filter(
+                (a) => a.id !== tempId
+              );
 
             this.snackbarManage.show(errorMessage);
           },
@@ -116,9 +166,7 @@ export class SchedulesMonthComponent implements OnInit, OnDestroy {
         next: (data) => {
           console.log('Received schedule data:', data);
 
-          // Ensure data has scheduledAppointments before assigning
           if (data && typeof data === 'object') {
-            // Create a valid object even if data is incomplete
             this.monthSchedule = {
               year: data.year || year,
               month: data.month || month,
@@ -126,11 +174,16 @@ export class SchedulesMonthComponent implements OnInit, OnDestroy {
             };
 
             console.log('Updated monthSchedule:', this.monthSchedule);
+
+            this.monthSchedule.scheduledAppointments.forEach((appt) => {
+              console.log(
+                `Appointment: id=${appt.id}, day=${appt.day}, client=${appt.clientName}`
+              );
+            });
           } else {
             console.error('Received invalid data format:', data);
             this.snackbarManage.show('Erro no formato dos dados recebidos');
 
-            // Set default values if data is invalid
             this.monthSchedule = {
               year: year,
               month: month,
@@ -142,7 +195,6 @@ export class SchedulesMonthComponent implements OnInit, OnDestroy {
           console.error('Error fetching schedules:', err);
           this.snackbarManage.show('Erro ao carregar agendamentos');
 
-          // Set default values on error
           this.monthSchedule = {
             year: year,
             month: month,

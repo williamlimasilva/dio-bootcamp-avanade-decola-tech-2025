@@ -119,6 +119,30 @@
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+
+      <!-- Template quando não há agendamentos para exibir -->
+      <tr class="mat-row" *matNoDataRow>
+        <td
+          class="mat-cell"
+          colspan="4"
+          style="text-align: center; padding: 16px"
+        >
+          Nenhum agendamento encontrado para
+          {{ selected | date : "dd/MM/yyyy" }}
+        </td>
+      </tr>
     </table>
+
+    <!-- Debug info - pode ser removido em produção -->
+    <div
+      style="margin-top: 16px; font-size: 12px; color: #999"
+      *ngIf="monthSchedule?.scheduledAppointments?.length"
+    >
+      <p>
+        Total de agendamentos no mês:
+        {{ monthSchedule.scheduledAppointments.length }}
+      </p>
+      <p>Data selecionada: {{ selected | date : "dd/MM/yyyy" }}</p>
+    </div>
   </div>
 </div>

@@ -122,12 +122,12 @@ export class ScheduleCalendarComponent
       this.dataSource.paginator = this.paginator;
     }
   }
+
   ngOnChanges(changes: SimpleChanges): void {
     console.log('ngOnChanges detected in schedule-calendar', changes);
 
     if (changes['monthSchedule'] && this.monthSchedule) {
       console.log('monthSchedule changed:', this.monthSchedule);
-      // Make sure monthSchedule has the scheduledAppointments property
       if (!this.monthSchedule.scheduledAppointments) {
         console.warn(
           'monthSchedule is missing scheduledAppointments, creating empty array'
@@ -135,12 +135,10 @@ export class ScheduleCalendarComponent
         this.monthSchedule.scheduledAppointments = [];
       }
 
-      // Force a rebuild of the table when new data arrives
       this.buildTable();
     }
 
     if (changes['clients'] && this.clients) {
-      // Update client selection if needed
       if (this.clientSelectFormControl) {
         this.clientSelectFormControl.updateValueAndValidity();
       }
@@ -176,49 +174,15 @@ export class ScheduleCalendarComponent
 
     this.onScheduleClient.emit(scheduleData);
 
-    // Add the appointment to the current view immediately
-    this.addAppointmentToTable(scheduleData);
-
-    // Reset form after submission
     form.resetForm();
     this.newSchedule = {
       startAt: undefined,
       endAt: undefined,
       clientId: undefined,
     };
-  }
 
-  // Add this new method to handle adding appointments to the table
-  private addAppointmentToTable(schedule: SaveScheduleModel) {
-    // Find client name from the client id
-    const client = this.clients.find((c) => c.id === schedule.clientId);
-    if (!client) return;
-
-    // Create a temporary ID for the new appointment
-    // This will be replaced with the real ID from the server response
-    const tempId = Date.now();
-
-    // Create a new appointment model to add to the table
-    const newAppointment: ClientScheduleAppointmentModel = {
-      id: tempId,
-      day: this._selected.getDate(),
-      startAt: schedule.startAt!,
-      endAt: schedule.endAt!,
-      clientId: schedule.clientId!,
-      clientName: client.name,
-    };
-
-    // Add the new appointment to the data source
-    const currentData = this.dataSource.data;
-    this.dataSource = new MatTableDataSource<ClientScheduleAppointmentModel>([
-      ...currentData,
-      newAppointment,
-    ]);
-
-    // Update paginator
-    if (this.paginator) {
-      this.dataSource.paginator = this.paginator;
-    }
+    // Forçar uma reconstrução da tabela para refletir a mudança
+    this.buildTable();
   }
 
   requestDelete(schedule: ClientScheduleAppointmentModel) {
@@ -230,16 +194,7 @@ export class ScheduleCalendarComponent
       .subscribe((result) => {
         if (result) {
           this.onConfirmDelete.emit(schedule);
-          const updatedeList = this.dataSource.data.filter(
-            (c) => c.id !== schedule.id
-          );
-          this.dataSource =
-            new MatTableDataSource<ClientScheduleAppointmentModel>(
-              updatedeList
-            );
-          if (this.paginator) {
-            this.dataSource.paginator = this.paginator;
-          }
+          this.buildTable();
         }
       });
   }
@@ -253,7 +208,6 @@ export class ScheduleCalendarComponent
   private buildTable() {
     console.log('Building table with monthSchedule:', this.monthSchedule);
 
-    // Only try to filter appointments if we have monthSchedule data
     if (!this.monthSchedule || !this.monthSchedule.scheduledAppointments) {
       console.warn('Missing data for table, using empty dataset');
       this.dataSource = new MatTableDataSource<ClientScheduleAppointmentModel>(
@@ -263,11 +217,24 @@ export class ScheduleCalendarComponent
     }
 
     try {
+      console.log('Selected date:', this._selected);
+      console.log('Month from data:', this.monthSchedule.month);
+      console.log('Month from selected date:', this._selected.getMonth() + 1);
+
       const appointments = this.monthSchedule.scheduledAppointments.filter(
-        (a) =>
-          this.monthSchedule.year === this._selected.getFullYear() &&
-          this.monthSchedule.month - 1 === this._selected.getMonth() &&
-          a.day === this._selected.getDate()
+        (a) => {
+          const isSameYear =
+            this.monthSchedule.year === this._selected.getFullYear();
+          const isSameMonth =
+            this.monthSchedule.month === this._selected.getMonth() + 1;
+          const isSameDay = a.day === this._selected.getDate();
+
+          console.log(
+            `Appointment ${a.id}: Year match: ${isSameYear}, Month match: ${isSameMonth}, Day match: ${isSameDay}`
+          );
+
+          return isSameYear && isSameMonth && isSameDay;
+        }
       );
 
       console.log('Filtered appointments for selected date:', appointments);
