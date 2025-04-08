@@ -29,17 +29,17 @@ export class ClientsService implements ClientsInterface {
     request: UpdateClientRequest
   ): Observable<UpdateClientResponse> {
     return this.http.put<UpdateClientResponse>(
-      `${this.basePath}clients${id}`,
+      `${this.basePath}clients/${id}`,
       request
     );
   }
   delete(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.basePath}clients${id}`);
+    return this.http.delete<void>(`${this.basePath}clients/${id}`);
   }
   list(): Observable<ListClientResponse[]> {
     return this.http.get<ListClientResponse[]>(`${this.basePath}clients`);
   }
   findById(id: number): Observable<DetailClientResponse> {
-    return this.http.get<DetailClientResponse>(`${this.basePath}clients${id}`);
+    return this.http.get<DetailClientResponse>(`${this.basePath}clients/${id}`);
   }
 }
